@@ -4,8 +4,8 @@ import Posts from './components/Posts';
 function App() {
   return (
     <main>
-      <Posts />
       <PostAdd />
+      <Posts />
     </main>
   );
 }

@@ -1,8 +1,19 @@
 import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { sub } from 'date-fns';
 
 const initialState = [
-  { id: '1', title: 'Learn React', content: 'I am studying hard of react.' },
-  { id: '2', title: 'JavaScript', content: 'JS is powerful language.' },
+  {
+    id: '1',
+    title: 'Learn React',
+    content: 'I am studying hard of react.',
+    date: sub(new Date(), { minutes: 10 }).toISOString(),
+  },
+  {
+    id: '2',
+    title: 'JavaScript',
+    content: 'JS is powerful language.',
+    date: sub(new Date(), { minutes: 5 }).toISOString(),
+  },
 ];
 const postSlice = createSlice({
   name: 'posts',
@@ -17,12 +28,15 @@ const postSlice = createSlice({
       reducer(state, action) {
         state.push(action.payload);
       },
-      prepare(title, content) {
+      //components don't need to know the structure of the state
+      prepare(title, content, userId) {
         return {
           payload: {
             id: nanoid(),
             title,
             content,
+            date: new Date().toISOString(),
+            userId,
           },
         };
       },
