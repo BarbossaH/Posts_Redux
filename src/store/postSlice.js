@@ -1,34 +1,53 @@
-import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, nanoid } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { sub } from 'date-fns';
 
-const initialState = [
-  {
-    id: '1',
-    title: 'Learn React',
-    content: 'I am studying hard of react.',
-    date: sub(new Date(), { minutes: 10 }).toISOString(),
-    reactions: {
-      thumbsUp: 0,
-      wow: 0,
-      heart: 0,
-      rocket: 0,
-      coffee: 0,
-    },
-  },
-  {
-    id: '2',
-    title: 'JavaScript',
-    content: 'JS is powerful language.',
-    date: sub(new Date(), { minutes: 5 }).toISOString(),
-    reactions: {
-      thumbsUp: 0,
-      wow: 0,
-      heart: 0,
-      rocket: 0,
-      coffee: 0,
-    },
-  },
-];
+// const initialState = [
+//   {
+//     id: '1',
+//     title: 'Learn React',
+//     content: 'I am studying hard of react.',
+//     date: sub(new Date(), { minutes: 10 }).toISOString(),
+//     reactions: {
+//       thumbsUp: 0,
+//       wow: 0,
+//       heart: 0,
+//       rocket: 0,
+//       coffee: 0,
+//     },
+//   },
+//   {
+//     id: '2',
+//     title: 'JavaScript',
+//     content: 'JS is powerful language.',
+//     date: sub(new Date(), { minutes: 5 }).toISOString(),
+//     reactions: {
+//       thumbsUp: 0,
+//       wow: 0,
+//       heart: 0,
+//       rocket: 0,
+//       coffee: 0,
+//     },
+//   },
+// ];
+
+const initialState = {
+  posts: [],
+  status: 'idle', // idle, loading, succeeded, failed
+  error: null,
+};
+
+const POSTS_URL = 'https://jsonplaceholder.typicode.com/posts';
+export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
+  try {
+    const response = await axios.get(POSTS_URL);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    return error.message;
+  }
+});
+
 const postSlice = createSlice({
   name: 'posts',
   initialState,
@@ -36,11 +55,11 @@ const postSlice = createSlice({
     // addPost(state, action) {
     //   //this state is an array
     //   console.log('add a new post');
-    //   state.push(action.payload);
+    //   state.posts.push(action.payload);
     // },
     addPost: {
       reducer(state, action) {
-        state.push(action.payload);
+        state.posts.push(action.payload);
       },
       //components don't need to know the structure of the state
       prepare(title, content, userId) {
@@ -64,15 +83,44 @@ const postSlice = createSlice({
     },
     reactionAdd(state, action) {
       const { postId, reaction } = action.payload;
-      const existPost = state.find((post) => post.id == postId);
+      const existPost = state.posts.find((post) => post.id == postId);
       if (existPost) {
         existPost.reactions[reaction]++;
       }
     },
   },
+  extraReducers(builder) {
+    builder
+      .addCase(fetchPosts.pending, (state, action) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchPosts.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        let min = 1;
+        const loadedPosts = action.payload.map((post) => {
+          post.date = sub(new Date(), { minutes: min++ }).toISOString();
+          post.reactions = {
+            thumbsUp: 0,
+            wow: 0,
+            heart: 0,
+            rocket: 0,
+            coffee: 0,
+          };
+          return post;
+        });
+        // add the fetched posts to the array
+        state.posts = state.posts.concat(loadedPosts);
+      })
+      .addCase(fetchPosts.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      });
+  },
 });
 
-export const getAllPostsState = (state) => state.posts;
+export const getAllPostsState = (state) => state.posts.posts;
+export const getAllPostsStatus = (state) => state.posts.status;
+export const getAllPostsError = (state) => state.posts.error;
 
 export const { addPost, reactionAdd } = postSlice.actions;
 // to name the reducer as postsReducer, we can also name it late when you import it, but we should set it as a default,this point is different from RTKQ, rtkq just export the whole api, not slice.reducer. Which way is better?
