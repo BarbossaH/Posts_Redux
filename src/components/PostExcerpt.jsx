@@ -3,6 +3,7 @@ import PostTimeAgo from './PostTimeAgo';
 import PostReaction from './PostReaction';
 
 const PostExcerpt = ({ post }) => {
+  // console.log(post);
   return (
     <article key={post.id}>
       <h3

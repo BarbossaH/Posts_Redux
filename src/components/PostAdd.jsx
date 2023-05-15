@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { addPost } from '../store/postSlice';
+import { addNewPost } from '../store/postSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsersState } from '../store/userSlice';
 
 const PostAdd = () => {
+  const [addRequestStatus, setAddRequestStatus] = useState('idle');
+
   // console.log('post add component is changed');
   const dispatch = useDispatch();
   const [title, setTitle] = useState('');
@@ -13,6 +15,10 @@ const PostAdd = () => {
   const handleTitleChange = (e) => setTitle(e.target.value);
   const handleContentChange = (e) => setContent(e.target.value);
   const handleOptionChange = (e) => setUserId(e.target.value);
+  const canSave =
+    [title, content, userId].every(Boolean) && addRequestStatus === 'idle';
+  // const canSave = Boolean(title) && Boolean(content) && Boolean(userId);
+
   const handleAddPost = (e) => {
     // add an object including id, title,content,we need to create this obj first
     // const newPost = {
@@ -20,10 +26,17 @@ const PostAdd = () => {
     //   title,
     //   content,
     // };
-    dispatch(addPost(title, content, userId));
-    setContent('');
-    setTitle('');
-    setUserId('');
+    try {
+      setAddRequestStatus('pending');
+      dispatch(addNewPost({ title, body: content, userId })).unwrap();
+      setContent('');
+      setTitle('');
+      setUserId('');
+    } catch (error) {
+      console.error('Failed:', error);
+    } finally {
+      setAddRequestStatus('idle');
+    }
   };
   const users = useSelector(getAllUsersState);
   const usersOption = users.map((user) => (
@@ -33,7 +46,6 @@ const PostAdd = () => {
     </option>
   ));
 
-  const canSave = Boolean(title) && Boolean(content) && Boolean(userId);
   return (
     <section>
       <h2>Add a new Post</h2>

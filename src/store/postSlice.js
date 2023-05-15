@@ -38,6 +38,7 @@ const initialState = {
 };
 
 const POSTS_URL = 'https://jsonplaceholder.typicode.com/posts';
+
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   try {
     const response = await axios.get(POSTS_URL);
@@ -48,46 +49,53 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   }
 });
 
+export const addNewPost = createAsyncThunk(
+  'posts/addNewPost',
+  async (initialPost) => {
+    try {
+      const response = await axios.post(POSTS_URL, initialPost);
+      return response.data;
+    } catch (error) {
+      return error.message;
+    }
+  }
+);
+
 const postSlice = createSlice({
   name: 'posts',
   initialState,
   reducers: {
-    // addPost(state, action) {
-    //   //this state is an array
-    //   console.log('add a new post');
-    //   state.posts.push(action.payload);
+    // addPost: {
+    //   reducer(state, action) {
+    //     state.posts.push(action.payload);
+    //   },
+    //   //components don't need to know the structure of the state
+    //   prepare(title, content, userId) {
+    //     return {
+    //       payload: {
+    //         id: nanoid(),
+    //         title,
+    //         content,
+    //         date: new Date().toISOString(),
+    //         userId,
+    //         reactions: {
+    //           thumbsUp: 0,
+    //           wow: 0,
+    //           heart: 0,
+    //           rocket: 0,
+    //           coffee: 0,
+    //         },
+    //       },
+    //     };
+    //   },
     // },
-    addPost: {
-      reducer(state, action) {
-        state.posts.push(action.payload);
-      },
-      //components don't need to know the structure of the state
-      prepare(title, content, userId) {
-        return {
-          payload: {
-            id: nanoid(),
-            title,
-            content,
-            date: new Date().toISOString(),
-            userId,
-            reactions: {
-              thumbsUp: 0,
-              wow: 0,
-              heart: 0,
-              rocket: 0,
-              coffee: 0,
-            },
-          },
-        };
-      },
-    },
-    reactionAdd(state, action) {
-      const { postId, reaction } = action.payload;
-      const existPost = state.posts.find((post) => post.id == postId);
-      if (existPost) {
-        existPost.reactions[reaction]++;
-      }
-    },
+    // reactionAdd(state, action) {
+    //   const { postId, reaction } = action.payload;
+    //   const existPost = state.posts.find((post) => post.id == postId);
+    //   if (existPost) {
+    //     existPost.reactions[reaction]++;
+    //   }
+    // },
   },
   extraReducers(builder) {
     builder
@@ -114,6 +122,18 @@ const postSlice = createSlice({
       .addCase(fetchPosts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+      })
+      .addCase(addNewPost.fulfilled, (state, action) => {
+        action.payload.userId = Number(action.payload.userId);
+        action.payload.date = new Date().toISOString();
+        action.payload.reactions = {
+          thumbsUp: 0,
+          wow: 0,
+          heart: 0,
+          rocket: 0,
+          coffee: 0,
+        };
+        state.posts.push(action.payload);
       });
   },
 });
@@ -122,7 +142,7 @@ export const getAllPostsState = (state) => state.posts.posts;
 export const getAllPostsStatus = (state) => state.posts.status;
 export const getAllPostsError = (state) => state.posts.error;
 
-export const { addPost, reactionAdd } = postSlice.actions;
+// export const { addPost, reactionAdd } = postSlice.actions;
 // to name the reducer as postsReducer, we can also name it late when you import it, but we should set it as a default,this point is different from RTKQ, rtkq just export the whole api, not slice.reducer. Which way is better?
 
 // export const { reducer: postsReducer } = postSlice;
