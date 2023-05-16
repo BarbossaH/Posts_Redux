@@ -142,6 +142,16 @@ export const getAllPostsState = (state) => state.posts.posts;
 export const getAllPostsStatus = (state) => state.posts.status;
 export const getAllPostsError = (state) => state.posts.error;
 
+export const getPostById = (state, postId) => {
+  // console.log(state);
+  // return 0;
+  return state.posts.posts.find((post) => {
+    // console.log(post);
+    // console.log(postId);
+    return post.id === Number(postId);
+  });
+};
+
 // export const { addPost, reactionAdd } = postSlice.actions;
 // to name the reducer as postsReducer, we can also name it late when you import it, but we should set it as a default,this point is different from RTKQ, rtkq just export the whole api, not slice.reducer. Which way is better?
 
