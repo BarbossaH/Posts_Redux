@@ -1,15 +1,19 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getAllPostsState, getPostById, updatePost } from '../store/postSlice';
+import {
+  deletePost,
+  getAllPostsState,
+  getPostById,
+  updatePost,
+} from '../store/postSlice';
 import { getAllUsersState } from '../store/userSlice';
 import { useState } from 'react';
 
 const PostEdit = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const post = useSelector(getAllPostsState);
-  // const post = useSelector((state) => getPostById(state, postId));
-  console.log(post, postId);
+  const post = useSelector((state) => getPostById(state, postId));
+  // console.log(post, postId);
   const users = useSelector(getAllUsersState);
 
   const [title, setTitle] = useState(post?.title);
@@ -61,6 +65,21 @@ const PostEdit = () => {
       {user.name}
     </option>
   ));
+
+  const handleDeletePost = () => {
+    try {
+      setReqStatus('pending');
+      dispatch(deletePost({ id: post.id })).unwrap();
+      setTitle('');
+      setContent('');
+      setUserId('');
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to delete the post', error);
+    } finally {
+      setReqStatus('idle');
+    }
+  };
   return (
     <section>
       <h2>Edit Post</h2>
@@ -93,6 +112,13 @@ const PostEdit = () => {
         />
         <button type="button" onClick={handleSavePost} disabled={!canSave}>
           Save Post
+        </button>
+        <button
+          className="deleteButton"
+          type="button"
+          onClick={handleDeletePost}
+        >
+          Delete Post
         </button>
       </form>
     </section>

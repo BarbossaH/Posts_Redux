@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { addNewPost } from '../store/postSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsersState } from '../store/userSlice';
+import { useNavigate } from 'react-router-dom';
 
 const PostAdd = () => {
   const [addRequestStatus, setAddRequestStatus] = useState('idle');
-
+  const navigate = useNavigate();
   // console.log('post add component is changed');
   const dispatch = useDispatch();
   const [title, setTitle] = useState('');
@@ -32,6 +33,7 @@ const PostAdd = () => {
       setContent('');
       setTitle('');
       setUserId('');
+      navigate('/');
     } catch (error) {
       console.error('Failed:', error);
     } finally {

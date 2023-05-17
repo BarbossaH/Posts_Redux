@@ -72,41 +72,55 @@ export const updatePost = createAsyncThunk(
     }
   }
 );
+
+export const deletePost = createAsyncThunk(
+  'post/deletePost',
+  async (initialState) => {
+    const { id } = initialState;
+    try {
+      const res = await axios.delete(`${POSTS_URL}/${id}`);
+      if (res?.status === 200) return initialState;
+      return `${res?.status}: ${res?.statusText}`;
+    } catch (error) {
+      return error.message;
+    }
+  }
+);
 const postSlice = createSlice({
   name: 'posts',
   initialState,
   reducers: {
-    // addPost: {
-    //   reducer(state, action) {
-    //     state.posts.push(action.payload);
-    //   },
-    //   //components don't need to know the structure of the state
-    //   prepare(title, content, userId) {
-    //     return {
-    //       payload: {
-    //         id: nanoid(),
-    //         title,
-    //         content,
-    //         date: new Date().toISOString(),
-    //         userId,
-    //         reactions: {
-    //           thumbsUp: 0,
-    //           wow: 0,
-    //           heart: 0,
-    //           rocket: 0,
-    //           coffee: 0,
-    //         },
-    //       },
-    //     };
-    //   },
-    // },
-    // reactionAdd(state, action) {
-    //   const { postId, reaction } = action.payload;
-    //   const existPost = state.posts.find((post) => post.id == postId);
-    //   if (existPost) {
-    //     existPost.reactions[reaction]++;
-    //   }
-    // },
+    addPost: {
+      reducer(state, action) {
+        state.posts.push(action.payload);
+      },
+      //components don't need to know the structure of the state
+      prepare(title, content, userId) {
+        return {
+          payload: {
+            id: nanoid(),
+            title,
+            content,
+            date: new Date().toISOString(),
+            userId,
+            reactions: {
+              thumbsUp: 0,
+              wow: 0,
+              heart: 0,
+              rocket: 0,
+              coffee: 0,
+            },
+          },
+        };
+      },
+    },
+    reactionAdd(state, action) {
+      const { postId, reaction } = action.payload;
+      const existPost = state.posts.find((post) => post.id == postId);
+      if (existPost) {
+        existPost.reactions[reaction]++;
+      }
+    },
   },
   extraReducers(builder) {
     builder
@@ -157,6 +171,16 @@ const postSlice = createSlice({
         // console.log(action.payload.date);
         const posts = state.posts.filter((post) => post.id !== id);
         state.posts = [...posts, action.payload];
+      })
+      .addCase(deletePost.fulfilled, (state, action) => {
+        if (!action.payload?.id) {
+          console.log('delete could not complete');
+          console.log(action.payload);
+          return;
+        }
+        const { id } = action.payload;
+        const posts = state.posts.filter((post) => post.id !== id);
+        state.posts = posts;
       });
   },
 });
@@ -175,7 +199,7 @@ export const getPostById = (state, postId) => {
   return thePost;
 };
 
-// export const { addPost, reactionAdd } = postSlice.actions;
+export const { addPost, reactionAdd } = postSlice.actions;
 // to name the reducer as postsReducer, we can also name it late when you import it, but we should set it as a default,this point is different from RTKQ, rtkq just export the whole api, not slice.reducer. Which way is better?
 
 // export const { reducer: postsReducer } = postSlice;
