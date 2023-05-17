@@ -60,7 +60,18 @@ export const addNewPost = createAsyncThunk(
     }
   }
 );
-
+export const updatePost = createAsyncThunk(
+  'post/updatePost',
+  async (initialState) => {
+    const { id } = initialState;
+    try {
+      const res = await axios.put(`${POSTS_URL}/${id}`, initialState);
+      return res.data;
+    } catch (error) {
+      return error.message;
+    }
+  }
+);
 const postSlice = createSlice({
   name: 'posts',
   initialState,
@@ -134,6 +145,18 @@ const postSlice = createSlice({
           coffee: 0,
         };
         state.posts.push(action.payload);
+      })
+      .addCase(updatePost.fulfilled, (state, action) => {
+        if (!action.payload?.id) {
+          console.log('update could not complete');
+          console.log(action.payload);
+          return;
+        }
+        const { id } = action.payload;
+        action.payload.date = new Date().toISOString();
+        // console.log(action.payload.date);
+        const posts = state.posts.filter((post) => post.id !== id);
+        state.posts = [...posts, action.payload];
       });
   },
 });
@@ -145,11 +168,11 @@ export const getAllPostsError = (state) => state.posts.error;
 export const getPostById = (state, postId) => {
   // console.log(state);
   // return 0;
-  return state.posts.posts.find((post) => {
-    // console.log(post);
-    // console.log(postId);
+  const thePost = state.posts.posts.find((post) => {
     return post.id === Number(postId);
   });
+  // console.log(thePost);
+  return thePost;
 };
 
 // export const { addPost, reactionAdd } = postSlice.actions;

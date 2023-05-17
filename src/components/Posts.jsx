@@ -25,7 +25,7 @@ const Posts = () => {
   const orderedPosts = posts
     .slice() //copy the array from the 0 to the end
     .sort((a, b) => b.date.localeCompare(a.date));
-  console.log(orderedPosts);
+  // console.log(orderedPosts);
 
   let content;
   if (postStatus === 'loading') {
@@ -59,7 +59,7 @@ const Posts = () => {
   }
   return (
     <div>
-      <h2>POSTS</h2>
+      {/* <h2>POSTS</h2> */}
       {content}
     </div>
   );

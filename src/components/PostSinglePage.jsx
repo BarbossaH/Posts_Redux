@@ -1,7 +1,7 @@
 import PostAuthor from './PostAuthor';
 import PostTimeAgo from './PostTimeAgo';
 import PostReaction from './PostReaction';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getPostById } from '../store/postSlice';
 
@@ -23,11 +23,11 @@ const PostSinglePage = () => {
       {/* <p>{post.body}</p> */}
       <p>{post.body.substring(0, 100)}</p>
       <p className="postCredit">
+        <Link to={`/post/edit/${post.id}`}>Edit Post</Link>
         <PostAuthor userId={post.userId} />
-      </p>
-      <p>
         <PostTimeAgo timeStamp={post.date} />
       </p>
+
       <p>
         <PostReaction post={post} />
       </p>

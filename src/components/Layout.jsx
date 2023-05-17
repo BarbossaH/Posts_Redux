@@ -1,4 +1,11 @@
+import Header from './Header';
+
 const Layout = (props) => {
-  return <div>{props.children}</div>;
+  return (
+    <div>
+      <Header />
+      {props.children}
+    </div>
+  );
 };
 export default Layout;
