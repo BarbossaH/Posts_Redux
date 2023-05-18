@@ -2,8 +2,14 @@ import PostAuthor from './PostAuthor';
 import PostTimeAgo from './PostTimeAgo';
 import PostReaction from './PostReaction';
 import { Link } from 'react-router-dom';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { getPostById } from '../store/postSlice';
 
-const PostExcerpt = ({ post }) => {
+// const PostExcerpt = React.memo(....) using this to manage the component
+// let PostExcerpt = ({ post }) => {
+const PostExcerpt = ({ postId }) => {
+  const post = useSelector((state) => getPostById(state, postId));
   // console.log(post);
   return (
     <article key={post.id}>
@@ -27,4 +33,5 @@ const PostExcerpt = ({ post }) => {
     </article>
   );
 };
+// PostExcerpt = React.memo(PostExcerpt);
 export default PostExcerpt;
