@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import PostExcerpt from './PostExcerpt';
 
 const Posts = () => {
+  console.log('rendered');
   const dispatch = useDispatch();
 
   const posts = useSelector(getAllPostsState);

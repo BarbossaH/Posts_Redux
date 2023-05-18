@@ -1,4 +1,8 @@
-import { createAsyncThunk, createSlice, nanoid } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSelector,
+  createSlice,
+} from '@reduxjs/toolkit';
 import axios from 'axios';
 import { sub } from 'date-fns';
 
@@ -35,6 +39,7 @@ const initialState = {
   posts: [],
   status: 'idle', // idle, loading, succeeded, failed
   error: null,
+  count: 0,
 };
 
 const POSTS_URL = 'https://jsonplaceholder.typicode.com/posts';
@@ -90,36 +95,40 @@ const postSlice = createSlice({
   name: 'posts',
   initialState,
   reducers: {
-    addPost: {
-      reducer(state, action) {
-        state.posts.push(action.payload);
-      },
-      //components don't need to know the structure of the state
-      prepare(title, content, userId) {
-        return {
-          payload: {
-            id: nanoid(),
-            title,
-            content,
-            date: new Date().toISOString(),
-            userId,
-            reactions: {
-              thumbsUp: 0,
-              wow: 0,
-              heart: 0,
-              rocket: 0,
-              coffee: 0,
-            },
-          },
-        };
-      },
-    },
+    // addPost: {
+    //   reducer(state, action) {
+    //     state.posts.push(action.payload);
+    //   },
+    //   //components don't need to know the structure of the state
+    //   prepare(title, content, userId) {
+    //     return {
+    //       payload: {
+    //         id: nanoid(),
+    //         title,
+    //         content,
+    //         date: new Date().toISOString(),
+    //         userId,
+    //         reactions: {
+    //           thumbsUp: 0,
+    //           wow: 0,
+    //           heart: 0,
+    //           rocket: 0,
+    //           coffee: 0,
+    //         },
+    //       },
+    //     };
+    //   },
+    // },
     reactionAdd(state, action) {
       const { postId, reaction } = action.payload;
       const existPost = state.posts.find((post) => post.id == postId);
       if (existPost) {
         existPost.reactions[reaction]++;
       }
+    },
+    increaseCount(state, action) {
+      // this function is for testing the performance of the project.
+      state.count = state.count + 1;
     },
   },
   extraReducers(builder) {
@@ -188,6 +197,7 @@ const postSlice = createSlice({
 export const getAllPostsState = (state) => state.posts.posts;
 export const getAllPostsStatus = (state) => state.posts.status;
 export const getAllPostsError = (state) => state.posts.error;
+export const getCountState = (state) => state.posts.count;
 
 export const getPostById = (state, postId) => {
   // console.log(state);
@@ -199,7 +209,11 @@ export const getPostById = (state, postId) => {
   return thePost;
 };
 
-export const { addPost, reactionAdd } = postSlice.actions;
+export const getPostsByUser = createSelector(
+  [getAllPostsState, (state, userId) => userId],
+  (posts, userId) => posts.filter((post) => post.userId === userId)
+);
+export const { increaseCount, reactionAdd } = postSlice.actions;
 // to name the reducer as postsReducer, we can also name it late when you import it, but we should set it as a default,this point is different from RTKQ, rtkq just export the whole api, not slice.reducer. Which way is better?
 
 // export const { reducer: postsReducer } = postSlice;
